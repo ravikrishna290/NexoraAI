@@ -142,7 +142,7 @@ sequenceDiagram
 
 Existing DCS/SCADA systems add risk linearly ($Risk = R_1 + R_2$), missing lethal multi-factor hazard overlaps. Nexora evaluates cross-domain interactions using a **Non-Linear Gamma Matrix ($\gamma = 3.5x$)**:
 
-$$R_c = \min\left( 99.9\%,\ \left[ 1 - \prod_{i=1}^{N} (1 - w_i \cdot r_i) \right] \times 80 + \sum_{j,k} \gamma_{jk} \cdot r_j \cdot r_k \right)$$
+$$R_c = \min \Big( 99.9\%, \ \big[ 1 - \prod_{i=1}^{N} (1 - w_i \cdot r_i) \big] \times 80 + \sum_{j,k} \gamma_{jk} \cdot r_j \cdot r_k \Big)$$
 
 - **Cross-Domain Interaction Spike ($\gamma_{\text{gas, hot-work}} = +35.0$)**: Spatial overlap between an LEL gas accumulation ($22.4\%$) and an active Hot Work welding permit triggers an instant surge to **96.0% CRITICAL**.
 

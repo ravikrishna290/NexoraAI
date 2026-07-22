@@ -91,7 +91,7 @@ graph TB
 ### 3.1 Non-Linear Compound Risk Engine
 Calculates total compound risk $R_c$ using normalized base severities $r_i$, weights $w_i$, and cross-domain interaction multipliers $\gamma_{jk}$:
 
-$$R_c = \min\left( 99.9\%,\ \left[ 1 - \prod_{i=1}^{N} (1 - w_i \cdot r_i) \right] \times 80 + \sum_{j,k} \gamma_{jk} \cdot r_j \cdot r_k \right)$$
+$$R_c = \min \Big( 99.9\%, \ \big[ 1 - \prod_{i=1}^{N} (1 - w_i \cdot r_i) \big] \times 80 + \sum_{j,k} \gamma_{jk} \cdot r_j \cdot r_k \Big)$$
 
 ### 3.2 Multi-Agent Swarm (LangGraph & Gemini 2.0 Flash)
 - **`SensorAgent`**: Evaluates SCADA atmospheric gas accumulation ($>20\%$ LEL).
