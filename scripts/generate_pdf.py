@@ -1,64 +1,122 @@
 import os
 import subprocess
 import re
+import time
 
 def markdown_to_html(md_text):
-    # Basic Markdown parsing for executive PDF output
-    html = md_text
+    lines = md_text.split('\n')
+    output = []
     
-    # Headers
-    html = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
-    html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
-    html = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+    in_code_block = False
+    code_block_lang = ''
+    code_block_lines = []
     
-    # Bold & Italic
-    html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
-    html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+    in_table = False
+    table_lines = []
     
-    # Inline Code
-    html = re.sub(r'`([^`]+)`', r'<code>\1</code>', html)
-    
-    # Links
-    html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', html)
-    
-    # Horizontal rules
-    html = re.sub(r'^---$', r'<hr/>', html, flags=re.MULTILINE)
-    
-    # Lists
-    lines = html.split('\n')
     in_list = False
-    new_lines = []
     
+    def flush_table():
+        nonlocal in_table, table_lines
+        if not table_lines:
+            return ''
+        html_table = ['<div class="table-container"><table>']
+        for i, row in enumerate(table_lines):
+            cells = [c.strip() for c in row.strip('|').split('|')]
+            if i == 0:
+                html_table.append('  <thead><tr>' + ''.join(f'<th>{c}</th>' for c in cells) + '</tr></thead><tbody>')
+            elif i == 1 and '---' in row:
+                continue # Skip markdown table delimiter row
+            else:
+                html_table.append('  <tr>' + ''.join(f'<td>{c}</td>' for c in cells) + '</tr>')
+        html_table.append('</tbody></table></div>')
+        in_table = False
+        table_lines = []
+        return '\n'.join(html_table)
+
     for line in lines:
-        if line.strip().startswith('- '):
+        stripped = line.strip()
+        
+        # Handle Code / Mermaid Blocks
+        if stripped.startswith('```'):
+            if in_code_block:
+                # Closing code block
+                content = '\n'.join(code_block_lines)
+                if code_block_lang == 'mermaid':
+                    output.append(f'<div class="mermaid-box"><pre class="mermaid">\n{content}\n</pre></div>')
+                else:
+                    output.append(f'<pre><code>{content}</code></pre>')
+                in_code_block = False
+                code_block_lines = []
+                code_block_lang = ''
+            else:
+                # Opening code block
+                in_code_block = True
+                code_block_lang = stripped[3:].strip().lower()
+                code_block_lines = []
+            continue
+            
+        if in_code_block:
+            code_block_lines.append(line)
+            continue
+            
+        # Handle Tables
+        if stripped.startswith('|') and stripped.endswith('|'):
+            if not in_table:
+                in_table = True
+                table_lines = []
+            table_lines.append(stripped)
+            continue
+        else:
+            if in_table:
+                output.append(flush_table())
+                
+        # Handle Lists
+        if stripped.startswith('- ') or stripped.startswith('* '):
             if not in_list:
-                new_lines.append('<ul>')
+                output.append('<ul>')
                 in_list = True
-            new_lines.append(f'  <li>{line.strip()[2:]}</li>')
+            content = stripped[2:].strip()
+            # Inline formatting
+            content = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', content)
+            content = re.sub(r'`([^`]+)`', r'<code>\1</code>', content)
+            output.append(f'  <li>{content}</li>')
+            continue
         else:
             if in_list:
-                new_lines.append('</ul>')
+                output.append('</ul>')
                 in_list = False
-            new_lines.append(line)
-    if in_list:
-        new_lines.append('</ul>')
-        
-    html = '\n'.join(new_lines)
-    
-    # Code blocks
-    html = re.sub(r'```(.*?)\n(.*?)```', r'<pre><code>\2</code></pre>', html, flags=re.DOTALL)
-    
-    # Paragraphs (simple double newline)
-    paragraphs = html.split('\n\n')
-    processed_p = []
-    for p in paragraphs:
-        p_str = p.strip()
-        if not p_str.startswith('<h') and not p_str.startswith('<ul') and not p_str.startswith('<pre') and not p_str.startswith('<hr') and not p_str.startswith('<table'):
-            processed_p.append(f'<p>{p_str}</p>')
-        else:
-            processed_p.append(p_str)
+
+        # Handle Headings
+        if stripped.startswith('# '):
+            output.append(f'<h1>{stripped[2:]}</h1>')
+            continue
+        elif stripped.startswith('## '):
+            output.append(f'<h2>{stripped[3:]}</h2>')
+            continue
+        elif stripped.startswith('### '):
+            output.append(f'<h3>{stripped[4:]}</h3>')
+            continue
             
-    return '\n\n'.join(processed_p)
+        # Handle HR
+        if stripped == '---':
+            output.append('<hr/>')
+            continue
+            
+        # Paragraphs & Inline formatting
+        if stripped:
+            line_formatted = stripped
+            line_formatted = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', line_formatted)
+            line_formatted = re.sub(r'`([^`]+)`', r'<code>\1</code>', line_formatted)
+            line_formatted = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', line_formatted)
+            output.append(f'<p>{line_formatted}</p>')
+            
+    if in_table:
+        output.append(flush_table())
+    if in_list:
+        output.append('</ul>')
+        
+    return '\n'.join(output)
 
 def build_full_html(body_html):
     return f"""<!DOCTYPE html>
@@ -66,53 +124,56 @@ def build_full_html(body_html):
 <head>
 <meta charset="UTF-8">
 <title>NEXORA — Executive Hackathon Submission Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
     
     @page {{
         size: A4;
-        margin: 20mm 15mm 20mm 15mm;
+        margin: 15mm 12mm 15mm 12mm;
     }}
     
     body {{
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         color: #0f172a;
         background-color: #ffffff;
-        line-height: 1.6;
-        font-size: 10.5pt;
+        line-height: 1.5;
+        font-size: 10pt;
     }}
     
     h1 {{
         color: #1e1b4b;
-        font-size: 22pt;
+        font-size: 20pt;
         font-weight: 800;
         border-bottom: 3px solid #4f46e5;
-        padding-bottom: 8px;
+        padding-bottom: 6px;
         margin-top: 0;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         letter-spacing: -0.5px;
     }}
     
     h2 {{
         color: #312e81;
-        font-size: 14pt;
+        font-size: 13pt;
         font-weight: 700;
         border-bottom: 1.5px solid #e0e7ff;
         padding-bottom: 4px;
-        margin-top: 24px;
-        margin-bottom: 12px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        page-break-after: avoid;
     }}
     
     h3 {{
         color: #4338ca;
-        font-size: 12pt;
+        font-size: 11pt;
         font-weight: 600;
-        margin-top: 16px;
-        margin-bottom: 8px;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        page-break-after: avoid;
     }}
     
     p {{
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }}
     
     strong {{
@@ -127,12 +188,12 @@ def build_full_html(body_html):
     
     ul {{
         margin-top: 4px;
-        margin-bottom: 12px;
-        padding-left: 20px;
+        margin-bottom: 10px;
+        padding-left: 18px;
     }}
     
     li {{
-        margin-bottom: 4px;
+        margin-bottom: 3px;
     }}
     
     code {{
@@ -141,20 +202,21 @@ def build_full_html(body_html):
         color: #0f172a;
         padding: 2px 5px;
         border-radius: 4px;
-        font-size: 9pt;
+        font-size: 8.5pt;
         border: 1px solid #e2e8f0;
     }}
     
     pre {{
         background-color: #0f172a;
         color: #f8fafc;
-        padding: 12px 16px;
+        padding: 10px 14px;
         border-radius: 6px;
         overflow-x: auto;
-        font-size: 9pt;
-        line-height: 1.45;
-        margin-top: 10px;
-        margin-bottom: 14px;
+        font-size: 8.5pt;
+        line-height: 1.4;
+        margin-top: 8px;
+        margin-bottom: 12px;
+        page-break-inside: avoid;
     }}
     
     pre code {{
@@ -164,22 +226,42 @@ def build_full_html(body_html):
         border: none;
     }}
     
+    .mermaid-box {{
+        background-color: #fafafa;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 16px 0;
+        text-align: center;
+        page-break-inside: avoid;
+    }}
+    
+    .mermaid {{
+        display: block;
+        margin: 0 auto;
+    }}
+    
     hr {{
         border: none;
         border-top: 1px solid #e2e8f0;
-        margin: 20px 0;
+        margin: 16px 0;
+    }}
+    
+    .table-container {{
+        margin: 12px 0;
+        overflow-x: auto;
+        page-break-inside: avoid;
     }}
     
     table {{
         width: 100%;
         border-collapse: collapse;
-        margin: 14px 0;
-        font-size: 9.5pt;
+        font-size: 9pt;
     }}
     
     th, td {{
         border: 1px solid #cbd5e1;
-        padding: 8px 12px;
+        padding: 7px 10px;
         text-align: left;
     }}
     
@@ -192,18 +274,21 @@ def build_full_html(body_html):
     tr:nth-child(even) {{
         background-color: #f8fafc;
     }}
-    
-    .badge-box {{
-        background-color: #e0e7ff;
-        border-left: 4px solid #4f46e5;
-        padding: 12px 16px;
-        margin: 14px 0;
-        border-radius: 0 6px 6px 0;
-    }}
 </style>
 </head>
 <body>
 {body_html}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {{
+        mermaid.initialize({{
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: {{ useMaxWidth: false, htmlLabels: true }}
+        }});
+    }});
+</script>
 </body>
 </html>
 """
@@ -233,13 +318,14 @@ def generate():
         '--headless',
         '--disable-gpu',
         '--no-pdf-header-footer',
+        '--run-all-compositor-stages-before-draw',
+        '--virtual-time-budget=10000',
         f'--print-to-pdf={pdf_file}',
         html_file
     ]
     
     res = subprocess.run(cmd, capture_output=True, text=True)
-    print("Edge stdout:", res.stdout)
-    print("Edge stderr:", res.stderr)
+    print("Edge output:", res.stdout, res.stderr)
     
     if os.path.exists(pdf_file):
         size_kb = os.path.getsize(pdf_file) / 1024
