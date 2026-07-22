@@ -1,6 +1,5 @@
 import os
 import subprocess
-import time
 
 def generate_diagram_image():
     html_file = r'd:\Nexora AI\architecture_diagram.html'
@@ -9,6 +8,9 @@ def generate_diagram_image():
 
     mermaid_code = """
 graph TB
+    %% ===================================================
+    %% LAYER 1: INDUSTRIAL EDGE & SENSOR INGESTION LAYER
+    %% ===================================================
     subgraph LAYER_1 ["🌐 LAYER 1: INDUSTRIAL EDGE & SENSOR INGESTION LAYER"]
         direction LR
         S1["⛽ SCADA Gas Sensors<br/>(LEL Analyser G-104 / G-105)"]
@@ -18,6 +20,9 @@ graph TB
         S5["📊 Industrial CSV Datasets<br/>(AI4I 2020 & Smoke/Fire IoT)"]
     end
 
+    %% ===================================================
+    %% LAYER 2: ENTERPRISE API GATEWAY
+    %% ===================================================
     subgraph LAYER_2 ["⚡ LAYER 2: ENTERPRISE API GATEWAY & REAL-TIME WEBSOCKET STREAMER (FastAPI - Port 8000)"]
         direction TB
         GATEWAY["🛡️ OAuth2 / JWT Auth & RBAC Guard<br/>(Role-Based Access Control)"]
@@ -27,6 +32,9 @@ graph TB
         WS_STREAM["📡 Live WebSocket Telemetry Broadcaster<br/>(/ws/live @ 60 FPS Streamer)"]
     end
 
+    %% ===================================================
+    %% LAYER 3: MULTI-AGENT AI SWARM LAYER (LangGraph)
+    %% ===================================================
     subgraph LAYER_3 ["🧠 LAYER 3: MULTI-AGENT AI SWARM INTELLIGENCE LAYER (LangGraph + Gemini 2.0 Flash)"]
         direction TB
         SUPERVISOR["👑 SupervisorAgent<br/>(Swarm Orchestrator & Gemini 2.0 Flash XAI Synthesizer)"]
@@ -41,6 +49,9 @@ graph TB
         end
     end
 
+    %% ===================================================
+    %% LAYER 4: COMPOUND RISK & VECTOR STORAGE LAYER
+    %% ===================================================
     subgraph LAYER_4 ["🧮 LAYER 4: NON-LINEAR COMPOUND RISK & VECTOR STORAGE LAYER"]
         direction LR
         RISK_ENGINE["🔥 Non-Linear Compound Risk Engine<br/>(Gamma Matrix γ = 3.5x Interaction Surge)"]
@@ -50,6 +61,9 @@ graph TB
         POSTGRES["💾 SQLAlchemy 2.0 Async / PostgreSQL<br/>(Audit Ledger & State Tables)"]
     end
 
+    %% ===================================================
+    %% LAYER 5: EXECUTIVE PRESENTATION LAYER
+    %% ===================================================
     subgraph LAYER_5 ["🖥️ LAYER 5: EXECUTIVE PRESENTATION & MISSION CONTROL LAYER (React 19 + Vite)"]
         direction LR
         DASHBOARD["📊 Executive Command Center<br/>(/dashboard - KPI Metrics & Alerts)"]
@@ -59,6 +73,7 @@ graph TB
         AUDIT_UI["📜 Cryptographic Audit Ledger<br/>(/audit-ledger - SHA-256 Event Chain)"]
     end
 
+    %% CONNECTIONS
     S1 & S2 & S3 & S4 & S5 --> GATEWAY
     GATEWAY --> RATELIMIT --> REST_API & WS_STREAM
     GATEWAY --> OBS
@@ -81,52 +96,59 @@ graph TB
 <html>
 <head>
 <meta charset="UTF-8">
-<title>NEXORA Architecture Diagram</title>
+<title>NEXORA Complete Architecture Diagram</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    * {{
+        box-sizing: border-box;
+    }}
     body {{
         font-family: 'Inter', sans-serif;
         background-color: #0b0f19;
         color: #f8fafc;
         margin: 0;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        padding: 40px;
+        width: 2200px;
+        min-height: 2800px;
     }}
     .header {{
         text-align: center;
-        margin-bottom: 24px;
+        margin-bottom: 30px;
     }}
     .header h1 {{
         color: #818cf8;
-        font-size: 24pt;
+        font-size: 28pt;
         font-weight: 800;
         margin: 0;
         letter-spacing: -0.5px;
     }}
     .header p {{
         color: #94a3b8;
-        font-size: 12pt;
-        margin-top: 6px;
+        font-size: 14pt;
+        margin-top: 8px;
     }}
     .diagram-card {{
         background: #111827;
-        border: 1.5px solid #1e293b;
-        border-radius: 16px;
-        padding: 32px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        border: 2px solid #1e293b;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        width: 100%;
     }}
     .mermaid {{
         background: transparent;
+        width: 100%;
+    }}
+    .mermaid svg {{
+        max-width: 100% !important;
+        height: auto !important;
     }}
 </style>
 </head>
 <body>
 <div class="header">
-    <h1>NEXORA — Multi-Layer Enterprise Architecture Topology</h1>
+    <h1>NEXORA — Full System Architecture & Data Flow Topology</h1>
     <p>Autonomous AI Safety Operating System for Zero-Harm Industrial Facilities</p>
 </div>
 <div class="diagram-card">
@@ -159,9 +181,9 @@ graph TB
         edge_path,
         '--headless',
         '--disable-gpu',
-        '--window-size=2000,1600',
+        '--window-size=2300,3200',
         '--run-all-compositor-stages-before-draw',
-        '--virtual-time-budget=8000',
+        '--virtual-time-budget=10000',
         f'--screenshot={png_file}',
         html_file
     ]
@@ -171,9 +193,7 @@ graph TB
 
     if os.path.exists(png_file):
         size_kb = os.path.getsize(png_file) / 1024
-        print(f"SUCCESS: Generated Architecture Image PNG at {png_file} ({size_kb:.1f} KB)")
-        
-        # Copy to artifacts directory
+        print(f"SUCCESS: Generated Complete Architecture Image PNG at {png_file} ({size_kb:.1f} KB)")
         subprocess.run(f'copy "{png_file}" "{artifact_png}"', shell=True)
         print("Copied to artifacts dir.")
     else:
