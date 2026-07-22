@@ -24,10 +24,12 @@ jobs:
           pip install -r requirements.txt
           pip install pytest httpx
 
-      - name: Run Pytest Test Suite
+      - name: Start FastAPI Server & Run Pytest Test Suite
         env:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
+          python -m uvicorn backend.main:app --port 8000 &
+          sleep 4
           pytest tests/
 
       - name: Set up Node.js 20
