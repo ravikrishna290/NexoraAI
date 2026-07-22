@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NEXORA Architecture Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #0b0f19;
+        color: #f8fafc;
+        margin: 0;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .header h1 {
+        color: #818cf8;
+        font-size: 24pt;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    .header p {
+        color: #94a3b8;
+        font-size: 12pt;
+        margin-top: 6px;
+    }
+    .diagram-card {
+        background: #111827;
+        border: 1.5px solid #1e293b;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    }
+    .mermaid {
+        background: transparent;
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>NEXORA — Multi-Layer Enterprise Architecture Topology</h1>
+    <p>Autonomous AI Safety Operating System for Zero-Harm Industrial Facilities</p>
+</div>
+<div class="diagram-card">
+    <pre class="mermaid">
+
+graph TB
+    subgraph LAYER_1 ["🌐 LAYER 1: INDUSTRIAL EDGE & SENSOR INGESTION LAYER"]
+        direction LR
+        S1["⛽ SCADA Gas Sensors<br/>(LEL Analyser G-104 / G-105)"]
+        S2["⚙️ Predictive Telemetry<br/>(AI4I Pump P-102 / RPM / Vibration)"]
+        S3["🎥 CCTV Surveillance Grid<br/>(CAM-C01 to CAM-C06 + WebRTC Live Webcam)"]
+        S4["📝 Work Permit System<br/>(PTW Hot Work Approvals)"]
+        S5["📊 Industrial CSV Datasets<br/>(AI4I 2020 & Smoke/Fire IoT)"]
+    end
+
+    subgraph LAYER_2 ["⚡ LAYER 2: ENTERPRISE API GATEWAY & REAL-TIME WEBSOCKET STREAMER (FastAPI - Port 8000)"]
+        direction TB
+        GATEWAY["🛡️ OAuth2 / JWT Auth & RBAC Guard<br/>(Role-Based Access Control)"]
+        RATELIMIT["⏱️ Rate Limiting Middleware<br/>(Token Bucket: 120 req/min)"]
+        OBS["📊 Observability Probes<br/>(/healthz | /readyz | Prometheus /metrics)"]
+        REST_API["🔌 v1 REST API Controller<br/>(/api/v1/machines, /risk, /copilot, /simulation)"]
+        WS_STREAM["📡 Live WebSocket Telemetry Broadcaster<br/>(/ws/live @ 60 FPS Streamer)"]
+    end
+
+    subgraph LAYER_3 ["🧠 LAYER 3: MULTI-AGENT AI SWARM INTELLIGENCE LAYER (LangGraph + Gemini 2.0 Flash)"]
+        direction TB
+        SUPERVISOR["👑 SupervisorAgent<br/>(Swarm Orchestrator & Gemini 2.0 Flash XAI Synthesizer)"]
+        
+        subgraph AGENT_NODES ["Parallel Specialized Domain Agents"]
+            AGENT_SENSOR["📡 SensorAgent<br/>(SCADA LEL Gas Accumulation)"]
+            AGENT_MAINT["⚙️ MaintenanceAgent<br/>(AI4I Predictive Vibration/Wear)"]
+            AGENT_PERMIT["📜 PermitAgent<br/>(Hot Work Spatial Proximity)"]
+            AGENT_VISION["👁️ VisionAgent<br/>(YOLO v8 PPE & Zone Violation)"]
+            AGENT_COMPLIANCE["⚖️ ComplianceAgent<br/>(Sentence-Transformers Vector RAG)"]
+            AGENT_INCIDENT["🚨 IncidentAgent<br/>(Historical Precedent Matcher)"]
+        end
+    end
+
+    subgraph LAYER_4 ["🧮 LAYER 4: NON-LINEAR COMPOUND RISK & VECTOR STORAGE LAYER"]
+        direction LR
+        RISK_ENGINE["🔥 Non-Linear Compound Risk Engine<br/>(Gamma Matrix γ = 3.5x Interaction Surge)"]
+        RAG_ENGINE["📚 Sentence-Transformers Vector KB<br/>(OISD-105/116, OSHA 1910.119, ISO 45001)"]
+        CHROMA_DB["🗄️ ChromaDB Vector Store<br/>(Embedding Search)"]
+        REDIS_BUS["⚡ Redis Pub/Sub & Cache<br/>(Session & WebSocket Sync)"]
+        POSTGRES["💾 SQLAlchemy 2.0 Async / PostgreSQL<br/>(Audit Ledger & State Tables)"]
+    end
+
+    subgraph LAYER_5 ["🖥️ LAYER 5: EXECUTIVE PRESENTATION & MISSION CONTROL LAYER (React 19 + Vite)"]
+        direction LR
+        DASHBOARD["📊 Executive Command Center<br/>(/dashboard - KPI Metrics & Alerts)"]
+        TWIN["🗺️ Living P&ID Spatial Digital Twin<br/>(/digital-twin - SVG Animated Pipe Flows & Gas Clouds)"]
+        VISION_UI["📹 Vision Intelligence Workspace<br/>(/vision - RTSP 6-Cam Grid & Live Webcam)"]
+        XAI_UI["💡 4-Question XAI Diagnosis<br/>(Explainable AI & 1-Click Mitigation)"]
+        AUDIT_UI["📜 Cryptographic Audit Ledger<br/>(/audit-ledger - SHA-256 Event Chain)"]
+    end
+
+    S1 & S2 & S3 & S4 & S5 --> GATEWAY
+    GATEWAY --> RATELIMIT --> REST_API & WS_STREAM
+    GATEWAY --> OBS
+
+    REST_API --> SUPERVISOR
+    SUPERVISOR --> AGENT_NODES
+
+    AGENT_SENSOR & AGENT_MAINT & AGENT_PERMIT & AGENT_VISION & AGENT_COMPLIANCE & AGENT_INCIDENT --> RISK_ENGINE
+    AGENT_COMPLIANCE --> RAG_ENGINE --> CHROMA_DB
+    RISK_ENGINE --> SUPERVISOR
+
+    SUPERVISOR --> POSTGRES
+    WS_STREAM --> REDIS_BUS
+
+    REST_API --> DASHBOARD & TWIN & VISION_UI & XAI_UI & AUDIT_UI
+    WS_STREAM ==> TWIN & DASHBOARD
+
+    </pre>
+</div>
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: false, htmlLabels: true }
+    });
+</script>
+</body>
+</html>
