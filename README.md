@@ -11,52 +11,129 @@
 
 ---
 
-## 🏗️ System Architecture & Data Flow
+## 🏛️ Comprehensive Enterprise System Architecture
+
+### 1. Multi-Layer System Topology & Data Flow
 
 ```mermaid
-graph TD
-    subgraph Frontend Layer ["React 19 / TypeScript / Vite"]
-        UI[Executive Command Center UI]
-        DT[Living P&ID Spatial Digital Twin]
-        VI[Vision Intelligence & Live WebRTC Stream]
-        XAI[AI Explainable Diagnosis Card]
+graph TB
+    %% ===================================================
+    %% LAYER 1: INDUSTRIAL EDGE & SENSOR INGESTION LAYER
+    %% ===================================================
+    subgraph LAYER_1 ["🌐 LAYER 1: INDUSTRIAL EDGE & SENSOR INGESTION LAYER"]
+        direction LR
+        S1["⛽ SCADA Gas Sensors<br/>(LEL Analyser G-104 / G-105)"]
+        S2["⚙️ Predictive Telemetry<br/>(AI4I Pump P-102 / RPM / Vibration)"]
+        S3["🎥 CCTV Surveillance Grid<br/>(CAM-C01 to CAM-C06 + WebRTC Live Webcam)"]
+        S4["📝 Work Permit System<br/>(PTW Hot Work Approvals)"]
+        S5["📊 Industrial CSV Datasets<br/>(AI4I 2020 & Smoke/Fire IoT)"]
     end
 
-    subgraph API & WebSocket Layer ["FastAPI Async Engine (Port 8000)"]
-        AUTH[JWT Auth & RBAC Middleware]
-        WS[WebSocket Telemetry Streamer /ws/live]
-        REST[v1 REST Routers /api/v1/*]
-        OBS[Observability /healthz /metrics]
+    %% ===================================================
+    %% LAYER 2: ENTERPRISE API & WEBSOCKET GATEWAY LAYER
+    %% ===================================================
+    subgraph LAYER_2 ["⚡ LAYER 2: ENTERPRISE API GATEWAY & REAL-TIME WEBSOCKET STREAMER (FastAPI - Port 8000)"]
+        direction TB
+        GATEWAY["🛡️ OAuth2 / JWT Auth & RBAC Guard<br/>(Role-Based Access Control)"]
+        RATELIMIT["⏱️ Rate Limiting Middleware<br/>(Token Bucket: 120 req/min)"]
+        OBS["📊 Observability Probes<br/>(/healthz | /readyz | Prometheus /metrics)"]
+        REST_API["🔌 v1 REST API Controller<br/>(/api/v1/machines, /risk, /copilot, /simulation)"]
+        WS_STREAM["📡 Live WebSocket Telemetry Broadcaster<br/>(/ws/live @ 60 FPS Streamer)"]
     end
 
-    subgraph Multi-Agent Swarm Layer ["LangGraph & Google Gemini 2.0 Flash"]
-        SUP[SupervisorAgent - Swarm Synthesizer]
-        SA[SensorAgent - SCADA Gas LEL]
-        MA[MaintenanceAgent - AI4I Telemetry]
-        PA[PermitAgent - Hot Work PTWs]
-        VA[VisionAgent - YOLO v8 Detections]
-        CA[ComplianceAgent - Sentence Transformers RAG]
-        IA[IncidentAgent - Past Precedent Matcher]
+    %% ===================================================
+    %% LAYER 3: MULTI-AGENT AI SWARM LAYER (LangGraph)
+    %% ===================================================
+    subgraph LAYER_3 ["🧠 LAYER 3: MULTI-AGENT AI SWARM INTELLIGENCE LAYER (LangGraph + Gemini 2.0 Flash)"]
+        direction TB
+        SUPERVISOR["👑 SupervisorAgent<br/>(Swarm Orchestrator & Gemini 2.0 Flash XAI Synthesizer)"]
+        
+        subgraph AGENT_NODES ["Parallel Specialized Domain Agents"]
+            AGENT_SENSOR["📡 SensorAgent<br/>(SCADA LEL Gas Accumulation)"]
+            AGENT_MAINT["⚙️ MaintenanceAgent<br/>(AI4I Predictive Vibration/Wear)"]
+            AGENT_PERMIT["📜 PermitAgent<br/>(Hot Work Spatial Proximity)"]
+            AGENT_VISION["👁️ VisionAgent<br/>(YOLO v8 PPE & Zone Violation)"]
+            AGENT_COMPLIANCE["⚖️ ComplianceAgent<br/>(Sentence-Transformers Vector RAG)"]
+            AGENT_INCIDENT["🚨 IncidentAgent<br/>(Historical Precedent Matcher)"]
+        end
     end
 
-    subgraph Data & Storage Layer ["Databases & Vector Stores"]
-        SQL[SQLAlchemy 2.0 Async / PostgreSQL]
-        RAG[ChromaDB Vector Store - OSHA / OISD]
-        REDIS[Redis Pub/Sub & Token Rate Limiter]
-        CSV[Datasets: AI4I 2020 & Smoke/Fire IoT]
+    %% ===================================================
+    %% LAYER 4: COMPOUND RISK & VECTOR KNOWLEDGE LAYER
+    %% ===================================================
+    subgraph LAYER_4 ["🧮 LAYER 4: NON-LINEAR COMPOUND RISK & VECTOR STORAGE LAYER"]
+        direction LR
+        RISK_ENGINE["🔥 Non-Linear Compound Risk Engine<br/>(Gamma Matrix γ = 3.5x Interaction Surge)"]
+        RAG_ENGINE["📚 Sentence-Transformers Vector KB<br/>(OISD-105/116, OSHA 1910.119, ISO 45001)"]
+        CHROMA_DB["🗄️ ChromaDB Vector Store<br/>(Embedding Search)"]
+        REDIS_BUS["⚡ Redis Pub/Sub & Cache<br/>(Session & WebSocket Sync)"]
+        POSTGRES["💾 SQLAlchemy 2.0 Async / PostgreSQL<br/>(Audit Ledger & State Tables)"]
     end
 
-    UI --> REST
-    DT --> WS
-    VI --> REST
-    REST --> AUTH
-    AUTH --> SUP
-    SUP --> SA & MA & PA & VA & CA & IA
-    CA --> RAG
-    MA --> CSV
-    SA --> CSV
-    SUP --> SQL
-    WS --> REDIS
+    %% ===================================================
+    %% LAYER 5: PRESENTATION & COMMAND CENTER LAYER
+    %% ===================================================
+    subgraph LAYER_5 ["🖥️ LAYER 5: EXECUTIVE PRESENTATION & MISSION CONTROL LAYER (React 19 + Vite)"]
+        direction LR
+        DASHBOARD["📊 Executive Command Center<br/>(/dashboard - KPI Metrics & Alerts)"]
+        TWIN["🗺️ Living P&ID Spatial Digital Twin<br/>(/digital-twin - SVG Animated Pipe Flows & Gas Clouds)"]
+        VISION_UI["📹 Vision Intelligence Workspace<br/>(/vision - RTSP 6-Cam Grid & Live Webcam)"]
+        XAI_UI["💡 4-Question XAI Diagnosis<br/>(Explainable AI & 1-Click Mitigation)"]
+        AUDIT_UI["📜 Cryptographic Audit Ledger<br/>(/audit-ledger - SHA-256 Event Chain)"]
+    end
+
+    %% ===================================================
+    %% CONNECTIONS & DATA FLOW PATHS
+    %% ===================================================
+    S1 & S2 & S3 & S4 & S5 --> GATEWAY
+    GATEWAY --> RATELIMIT --> REST_API & WS_STREAM
+    GATEWAY --> OBS
+
+    REST_API --> SUPERVISOR
+    SUPERVISOR --> AGENT_NODES
+
+    AGENT_SENSOR & AGENT_MAINT & AGENT_PERMIT & AGENT_VISION & AGENT_COMPLIANCE & AGENT_INCIDENT --> RISK_ENGINE
+    AGENT_COMPLIANCE --> RAG_ENGINE --> CHROMA_DB
+    RISK_ENGINE --> SUPERVISOR
+
+    SUPERVISOR --> POSTGRES
+    WS_STREAM --> REDIS_BUS
+
+    REST_API --> DASHBOARD & TWIN & VISION_UI & XAI_UI & AUDIT_UI
+    WS_STREAM ==> TWIN & DASHBOARD
+```
+
+---
+
+### 2. Multi-Agent Swarm Real-Time Execution Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SCADA as Industrial Telemetry / SCADA
+    participant WS as WebSocket / REST Gateway
+    participant Swarm as LangGraph Multi-Agent Swarm
+    participant Risk as Compound Risk Engine (Gamma Matrix)
+    participant RAG as Vector RAG (OISD / OSHA)
+    participant Gemini as Google Gemini 2.0 Flash LLM
+    participant UI as React 19 Executive UI
+
+    SCADA->>WS: Telemetry Tick (LEL 22.4%, Vibration 8.4mm/s, Hot Work Active)
+    WS->>Swarm: Trigger Agent Evaluation Workflow
+    par Parallel Agent Processing
+        Swarm->>Swarm: SensorAgent evaluates G-104 (LEL Gas > 20%)
+        Swarm->>Swarm: MaintenanceAgent evaluates P-102 (Bearing Seal Failure)
+        Swarm->>Swarm: PermitAgent checks PTW-8409 (Spatial Overlap <8m)
+        Swarm->>Swarm: VisionAgent detects Worker W-804 (PPE Violation)
+        Swarm->>RAG: ComplianceAgent retrieves OISD-105 Sec 6.2 & OSHA 1910.119
+        Swarm->>Swarm: IncidentAgent matches 2021 Jamnagar Explosion (89% Match)
+    end
+    Swarm->>Risk: Compute Non-Linear Gamma Interaction (γ = 3.5x)
+    Risk-->>Swarm: Return Compound Risk Score: 96.0% CRITICAL
+    Swarm->>Gemini: Synthesize Agent Findings into 4-Question XAI Diagnosis
+    Gemini-->>Swarm: Return What / Why / How Dangerous / What to Do
+    Swarm->>WS: Broadcast Live Assessment JSON
+    WS-->>UI: Real-Time UI Update (Digital Twin Plume & XAI Card Flash)
 ```
 
 ---
