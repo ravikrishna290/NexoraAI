@@ -4,7 +4,6 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { FourQuestionCard } from '../components/domain/FourQuestionCard';
 import { CompoundRiskGraph } from '../components/domain/CompoundRiskGraph';
-import { RegulatoryTag } from '../components/domain/RegulatoryTag';
 import { useRiskStore } from '../store/useRiskStore';
 import { Flame, Sliders, ShieldAlert, CheckCircle2, History, Zap } from 'lucide-react';
 
